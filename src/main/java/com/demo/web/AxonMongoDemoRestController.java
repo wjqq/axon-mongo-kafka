@@ -1,52 +1,73 @@
 package com.demo.web;
 
-import com.demo.api.FindGiftCardQry;
-import com.demo.api.GiftCardRecord;
-import com.demo.api.IssueCmd;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.messaging.responsetypes.ResponseTypes;
 import org.axonframework.queryhandling.QueryGateway;
 import org.axonframework.queryhandling.SubscriptionQueryResult;
-import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-
-import java.util.UUID;
+import org.springframework.web.bind.annotation.RestController;
+import com.demo.api.FindAllGiftCard;
+import com.demo.api.FindGiftCardQry;
+import com.demo.api.GiftCardRecord;
+import com.demo.api.IssueCmd;
 
 /**
  * Repository REST Controller for handling 'commands' only
  * <p>
  * Sometimes you may want to write a custom handler for a specific resource. To take advantage of Spring Data REST’s settings, message converters, exception handling, and more, we use the @RepositoryRestController annotation instead of a standard Spring MVC @Controller or @RestController
  */
-@RepositoryRestController
+@RestController
 public class AxonMongoDemoRestController {
 
-    private final CommandGateway commandGateway;
-    private final QueryGateway queryGateway;
-    private final EntityLinks entityLinks;
+  private final CommandGateway commandGateway;
+  private final QueryGateway queryGateway;
+  private final EntityLinks entityLinks;
 
 
-    public AxonMongoDemoRestController(CommandGateway commandGateway, QueryGateway queryGateway, EntityLinks entityLinks) {
-        this.commandGateway = commandGateway;
-        this.queryGateway = queryGateway;
-        this.entityLinks = entityLinks;
+  public AxonMongoDemoRestController(CommandGateway commandGateway, QueryGateway queryGateway,
+      EntityLinks entityLinks) {
+    this.commandGateway = commandGateway;
+    this.queryGateway = queryGateway;
+    this.entityLinks = entityLinks;
+  }
+
+  @PostMapping(value = "/cards", consumes = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity cards(@RequestBody IssueRqst request) {
+
+    final String giftCardId = UUID.randomUUID().toString();
+
+    try (SubscriptionQueryResult<GiftCardRecord, GiftCardRecord> queryResult =
+        queryGateway.subscriptionQuery(new FindGiftCardQry(giftCardId),
+            ResponseTypes.instanceOf(GiftCardRecord.class),
+            ResponseTypes.instanceOf(GiftCardRecord.class))) {
+
+      commandGateway.sendAndWait(new IssueCmd(giftCardId, request.getValue()));
+
+      /* Returning the first update sent to our find card query. */
+      GiftCardRecord giftCardRecord = queryResult.updates().blockFirst();
+      return ResponseEntity.ok().body(giftCardRecord);
     }
+  }
 
-    @RequestMapping(value = "/cards", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity cards(@RequestBody IssueRqst request) {
+  @GetMapping(value = "/cards/{cardId}")
+  public CompletableFuture<GiftCardRecord> cards(@PathVariable String cardId) {
+    return queryGateway.query(new FindGiftCardQry(cardId),
+        ResponseTypes.instanceOf(GiftCardRecord.class));
+  }
 
-        final String giftCardId = UUID.randomUUID().toString();
+  @GetMapping(value = "/cards")
+  public CompletableFuture<List<GiftCardRecord>> allCards() {
+    return queryGateway.query(new FindAllGiftCard(),
+        ResponseTypes.multipleInstancesOf(GiftCardRecord.class));
+  }
 
-        try (SubscriptionQueryResult<GiftCardRecord, GiftCardRecord> queryResult = queryGateway.subscriptionQuery(new FindGiftCardQry(giftCardId), ResponseTypes.instanceOf(GiftCardRecord.class), ResponseTypes.instanceOf(GiftCardRecord.class))) {
-            commandGateway.sendAndWait(new IssueCmd(giftCardId, Integer.valueOf(request.getValue())));
-
-            /* Returning the first update sent to our find card query. */
-            GiftCardRecord giftCardRecord = queryResult.updates().blockFirst();
-            return ResponseEntity.ok().body(giftCardRecord);
-        }
-    }
 }

@@ -2,8 +2,10 @@ package com.demo.query;
 
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-class GiftCardEntity {
+@Document("abc")
+public class GiftCardEntity {
 
     @Id
     private String id;

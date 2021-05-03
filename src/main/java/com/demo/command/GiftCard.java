@@ -23,21 +23,21 @@ class GiftCard {
     private int remainingValue;
 
     public GiftCard() {
-        log.debug("empty constructor invoked");
+    log.info("empty constructor invoked");
     }
 
     @CommandHandler
     GiftCard(IssueCmd cmd) {
-        log.debug("handling {}", cmd);
+    log.info("handling {}", cmd);
         if (cmd.getAmount() <= 0) throw new IllegalArgumentException("amount <= 0");
         apply(new IssuedEvt(cmd.getId(), cmd.getAmount()));
     }
 
     @EventSourcingHandler
     void on(IssuedEvt evt) {
-        log.debug("applying {}", evt);
+    log.info("applying {}", evt);
         id = evt.getId();
         remainingValue = evt.getAmount();
-        log.debug("new remaining value: {}", remainingValue);
+    log.info("new remaining value: {}", remainingValue);
     }
 }

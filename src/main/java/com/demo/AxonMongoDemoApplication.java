@@ -1,6 +1,5 @@
 package com.demo;
 
-import java.util.Collections;
 import org.axonframework.eventhandling.tokenstore.TokenStore;
 import org.axonframework.eventsourcing.eventstore.EmbeddedEventStore;
 import org.axonframework.eventsourcing.eventstore.EventStorageEngine;
@@ -8,15 +7,16 @@ import org.axonframework.eventsourcing.eventstore.EventStore;
 import org.axonframework.extensions.mongo.DefaultMongoTemplate;
 import org.axonframework.extensions.mongo.MongoTemplate;
 import org.axonframework.extensions.mongo.eventsourcing.eventstore.MongoEventStorageEngine;
-import org.axonframework.extensions.mongo.eventsourcing.eventstore.MongoFactory;
 import org.axonframework.extensions.mongo.eventsourcing.tokenstore.MongoTokenStore;
 import org.axonframework.serialization.Serializer;
 import org.axonframework.spring.config.AxonConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.mongodb.MongoDbFactory;
+import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
 import com.mongodb.MongoClient;
-import com.mongodb.ServerAddress;
+import com.mongodb.MongoClientURI;
 
 @SpringBootApplication
 public class AxonMongoDemoApplication {
@@ -36,7 +36,7 @@ public class AxonMongoDemoApplication {
     public EmbeddedEventStore eventStore(EventStorageEngine storageEngine, AxonConfiguration configuration) {
         return EmbeddedEventStore.builder()
                 .storageEngine(storageEngine)
-                .messageMonitor(configuration.messageMonitor(EventStore.class, "eventStore"))
+        .messageMonitor(configuration.messageMonitor(EventStore.class, "eventStore1"))
                 .build();
     }
 
@@ -66,14 +66,17 @@ public class AxonMongoDemoApplication {
 
   @Bean
   public MongoTemplate axonMongoTemplate() {
-    return DefaultMongoTemplate.builder().mongoDatabase(mongo(), "db-axon").build();
+    return DefaultMongoTemplate.builder().mongoDatabase(mongo(), "db-axon0").build();
   }
 
   @Bean
+  public MongoDbFactory mongoDbFactory(MongoClient client) {
+    return new SimpleMongoDbFactory(client, "db-axon0");
+  }
+
+
+  @Bean
   public MongoClient mongo() {
-    MongoFactory mongoFactory = new MongoFactory();
-    mongoFactory
-        .setMongoAddresses(Collections.singletonList(new ServerAddress("127.0.0.1", 27017)));
-    return mongoFactory.createMongo();
+    return new MongoClient(new MongoClientURI("mongodb://localhost:27017/db-axon0"));
   }
 }

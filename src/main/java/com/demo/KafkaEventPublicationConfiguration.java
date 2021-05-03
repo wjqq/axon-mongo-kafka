@@ -29,8 +29,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class KafkaEventPublicationConfiguration {
 
-  private String bootstrapServer = "localhost:9092,localhost:9093,localhost:9094";
-  private String topic = "mytopic-axon";
+  private String bootstrapServer = "localhost:9092";
+  private String topic = "mytopic-axon-1";
 
   @Autowired
   public void registerPublisherToEventProcessor(EventProcessingConfigurer eventProcessingConfigurer,
