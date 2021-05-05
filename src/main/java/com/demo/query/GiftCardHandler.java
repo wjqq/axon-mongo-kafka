@@ -13,7 +13,8 @@ import com.demo.api.event.CardIncreasedEvt;
 import com.demo.api.event.IssuedEvt;
 import com.demo.api.query.FindAllGiftCard;
 import com.demo.api.query.FindGiftCardQry;
-import com.demo.api.result.GiftCardRecord;
+import com.demo.api.response.GiftCardRecord;
+import com.demo.query.entity.GiftCardEntity;
 import com.demo.query.repo.GiftCardRepository;
 
 @Component

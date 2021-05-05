@@ -1,4 +1,4 @@
-package com.demo.api.result;
+package com.demo.api.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

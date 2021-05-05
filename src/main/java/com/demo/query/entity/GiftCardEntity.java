@@ -1,4 +1,4 @@
-package com.demo.query;
+package com.demo.query.entity;
 
 
 import org.springframework.data.annotation.Id;

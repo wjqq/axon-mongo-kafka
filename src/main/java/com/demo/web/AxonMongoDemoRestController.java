@@ -22,7 +22,7 @@ import com.demo.api.query.FindAllGiftCard;
 import com.demo.api.query.FindGiftCardQry;
 import com.demo.api.request.CardIncreaseRqst;
 import com.demo.api.request.IssueRqst;
-import com.demo.api.result.GiftCardRecord;
+import com.demo.api.response.GiftCardRecord;
 
 /**
  * Repository REST Controller for handling 'commands' only
