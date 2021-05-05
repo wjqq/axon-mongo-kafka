@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.demo;
+package com.demo.config;
 
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
@@ -21,9 +21,7 @@ import org.springframework.context.annotation.Configuration;
  * @author 025937672
  * 
  * https://github.com/AxonFramework/extension-kafka/blob/8f1a0322bf14d146f8055f5771be2937342db752/kafka/src/test/java/org/axonframework/extensions/kafka/eventhandling/util/ProducerConfigUtil.java#L152
- * 
  * https://github.com/AxonFramework/extension-kafka/blob/master/kafka/src/test/java/org/axonframework/extensions/kafka/eventhandling/KafkaIntegrationTest.java
- * 
  *
  */
 @Configuration
@@ -80,5 +78,4 @@ public class KafkaEventPublicationConfiguration {
     config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, valueSerializer);
     return config;
   }
-
 }

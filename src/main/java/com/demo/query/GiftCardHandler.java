@@ -3,26 +3,25 @@ package com.demo.query;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.queryhandling.QueryHandler;
 import org.axonframework.queryhandling.QueryUpdateEmitter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import com.demo.api.FindAllGiftCard;
-import com.demo.api.FindGiftCardQry;
-import com.demo.api.GiftCardRecord;
-import com.demo.api.IssuedEvt;
+import com.demo.api.event.CardIncreasedEvt;
+import com.demo.api.event.IssuedEvt;
+import com.demo.api.query.FindAllGiftCard;
+import com.demo.api.query.FindGiftCardQry;
+import com.demo.api.result.GiftCardRecord;
 import com.demo.query.repo.GiftCardRepository;
 
 @Component
+@ProcessingGroup("GiftCardHandler")
 class GiftCardHandler {
 
   private final GiftCardRepository giftCardRepository;
   private final QueryUpdateEmitter queryUpdateEmitter;
-
-
-  @Autowired
-  org.springframework.data.mongodb.core.MongoTemplate mt;
 
   @Autowired
   public GiftCardHandler(GiftCardRepository giftCardRepository,
@@ -33,8 +32,8 @@ class GiftCardHandler {
 
   @EventHandler
   void on(IssuedEvt event) {
-
-    List<GiftCardEntity> beforeActions = giftCardRepository.findAll();
+    
+    System.out.println("Insued. "+ event.getId());
 
     /*
      * Update our read model by inserting the new card.
@@ -46,6 +45,29 @@ class GiftCardHandler {
     queryUpdateEmitter.emit(FindGiftCardQry.class,
         findGiftCardQry -> Objects.equals(event.getId(), findGiftCardQry.getId()),
         new GiftCardRecord(event.getId(), event.getAmount(), event.getAmount()));
+  
+    System.out.println("Insued Emitter. "+ event.getId());
+  }
+  
+  @EventHandler
+  void on(CardIncreasedEvt event) throws Exception {
+    
+    System.out.println("Increased. "+ event.getId());
+    
+    GiftCardEntity entity = giftCardRepository.findById(event.getId()).orElse(null);
+    if(entity == null) {
+      throw new Exception("Fail to process card increased event"+event);
+    }
+    
+    entity.setRemainingValue(entity.getRemainingValue()+event.getAmount());
+    giftCardRepository.save(entity);
+
+    /* Send it to subscription queries of type FindGiftCardQry, but only if the card id matches. */
+    queryUpdateEmitter.emit(FindGiftCardQry.class,
+        findGiftCardQry -> Objects.equals(event.getId(), findGiftCardQry.getId()),
+        new GiftCardRecord(event.getId(), entity.getInitialValue(), entity.getRemainingValue()));
+ 
+    System.out.println("Increased Emitter. "+ event.getId());
   }
 
   @QueryHandler

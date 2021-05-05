@@ -1,6 +1,9 @@
 package com.demo;
 
+import org.axonframework.config.Configuration;
 import org.axonframework.eventhandling.tokenstore.TokenStore;
+import org.axonframework.eventsourcing.EventCountSnapshotTriggerDefinition;
+import org.axonframework.eventsourcing.SnapshotTriggerDefinition;
 import org.axonframework.eventsourcing.eventstore.EmbeddedEventStore;
 import org.axonframework.eventsourcing.eventstore.EventStorageEngine;
 import org.axonframework.eventsourcing.eventstore.EventStore;
@@ -16,7 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
 import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
+import com.mongodb.ServerAddress;
 
 @SpringBootApplication
 public class AxonMongoDemoApplication {
@@ -62,7 +65,14 @@ public class AxonMongoDemoApplication {
         .serializer(serializer).build();
   }
 
-  //////////////////////////////////////////////////////////////////////////////////////
+  /**
+   * Configures a snapshot trigger to create a Snapshot every 5 events.
+   * 5 is an arbitrary number used only for testing purposes just to show how the snapshots are stored on Mongo as well.
+   */
+  @Bean
+  public SnapshotTriggerDefinition giftCardSnapConfig(Configuration configuration) {
+    return new EventCountSnapshotTriggerDefinition(configuration.snapshotter(), 5);
+  }
 
   @Bean
   public MongoTemplate axonMongoTemplate() {
@@ -74,9 +84,8 @@ public class AxonMongoDemoApplication {
     return new SimpleMongoDbFactory(client, "db-axon0");
   }
 
-
   @Bean
   public MongoClient mongo() {
-    return new MongoClient(new MongoClientURI("mongodb://localhost:27017/db-axon0"));
+    return new MongoClient(new ServerAddress("localhost", 27017));
   }
 }
