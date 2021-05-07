@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.demo.config;
+package com.demo;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,52 +17,56 @@ import org.axonframework.extensions.kafka.eventhandling.consumer.Fetcher;
 import org.axonframework.extensions.kafka.eventhandling.consumer.streamable.KafkaEventMessage;
 import org.axonframework.extensions.kafka.eventhandling.consumer.streamable.StreamableKafkaMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * @author 025937672
- *
- */
 @Configuration
 @ConditionalOnProperty(name = "axon.kafka.consumer.event-processor-mode",
     havingValue = "TRACKING")
 public class TrackingConfiguration {
+  
+  @Value("${axon.kafka.consumer.bootstrapservers}")
+  String bootstrapservers;
+  @Value("${axon.kafka.consumer.group-id}")
+  String groupId;
+  
+  String topic = "t111111111111111";
+  
   @Autowired
   public void configureStreamableKafkaSource(EventProcessingConfigurer configurer,
       StreamableKafkaMessageSource<String, byte[]> streamableKafkaMessageSource) {
-    configurer.registerTrackingEventProcessor("kafka-group-1",
-        config -> streamableKafkaMessageSource);
+      configurer.registerTrackingEventProcessor("kafka-group", c->streamableKafkaMessageSource);
   }
-
+  
   @Bean
   public StreamableKafkaMessageSource<String, byte[]> streamableKafkaMessageSource(
       ConsumerFactory<String, byte[]> consumerFactory,
       Fetcher<String, byte[], KafkaEventMessage> fetcher) {
-    return StreamableKafkaMessageSource.<String, byte[]>builder().topics(Arrays.asList("T1")) // Defaults
+    return StreamableKafkaMessageSource.<String, byte[]>builder()
+        .topics(Arrays.asList(topic)) // Defaults
         .consumerFactory(consumerFactory) // Hard requirement
         .fetcher(fetcher) // Hard requirement
         .build();
   }
-
+  
   @Bean
-  public Fetcher<?, ?, ?> fetcher() {
-    return AsyncFetcher.builder() // Defaults to "5000" milliseconds
+  public Fetcher<String, byte[], KafkaEventMessage> fetcher() {
+    return AsyncFetcher.<String, byte[], KafkaEventMessage>builder() // Defaults to "5000" milliseconds
         .build();
   }
-
+  
   @Bean
   public ConsumerFactory<String, byte[]> consumerFactory() {
-
     Map<String, Object> config = new HashMap<>();
-    config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-        "localhost:9092");
+    config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,bootstrapservers);
     config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
     config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-    config.put(ConsumerConfig.GROUP_ID_CONFIG, "G1");
-
+    config.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+    System.out.println("bootstrapservers: "+bootstrapservers);
+    System.out.println("groupId: "+groupId);
     return new DefaultConsumerFactory<>(config);
   }
 }

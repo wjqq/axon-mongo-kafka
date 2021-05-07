@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
+import org.axonframework.messaging.interceptors.ExceptionHandler;
 import org.axonframework.queryhandling.QueryHandler;
 import org.axonframework.queryhandling.QueryUpdateEmitter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import com.demo.api.event.IssuedEvt;
 import com.demo.api.query.FindAllGiftCard;
 import com.demo.api.query.FindGiftCardQry;
 import com.demo.api.response.GiftCardRecord;
+import com.demo.domain.exception.NotEnoughMoneyException;
 import com.demo.query.entity.GiftCardEntity;
 import com.demo.query.repo.GiftCardRepository;
 
@@ -53,13 +55,7 @@ class GiftCardHandler {
   @EventHandler
   void on(CardIncreasedEvt event) throws Exception {
     
-    System.out.println("Increased. "+ event.getId());
-    
     GiftCardEntity entity = giftCardRepository.findById(event.getId()).orElse(null);
-    if(entity == null) {
-      throw new Exception("Fail to process card increased event"+event);
-    }
-    
     entity.setRemainingValue(entity.getRemainingValue()+event.getAmount());
     giftCardRepository.save(entity);
 
@@ -70,7 +66,7 @@ class GiftCardHandler {
  
     System.out.println("Increased Emitter. "+ event.getId());
   }
-
+  
   @QueryHandler
   GiftCardRecord handle(FindGiftCardQry query) {
     GiftCardEntity giftCardEntity =

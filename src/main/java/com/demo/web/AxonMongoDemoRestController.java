@@ -3,6 +3,7 @@ package com.demo.web;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.messaging.responsetypes.ResponseTypes;
 import org.axonframework.queryhandling.QueryGateway;
@@ -23,6 +24,7 @@ import com.demo.api.query.FindGiftCardQry;
 import com.demo.api.request.CardIncreaseRqst;
 import com.demo.api.request.IssueRqst;
 import com.demo.api.response.GiftCardRecord;
+import com.demo.domain.exception.NotEnoughMoneyException;
 
 /**
  * Repository REST Controller for handling 'commands' only
@@ -45,11 +47,14 @@ public class AxonMongoDemoRestController {
             ResponseTypes.instanceOf(GiftCardRecord.class),
             ResponseTypes.instanceOf(GiftCardRecord.class))) {
 
-      commandGateway.sendAndWait(new CardIncreaseCmd(request.getId(), request.getValue()));
+      commandGateway.sendAndWait(new CardIncreaseCmd(request.getId(), request.getValue()),  10, TimeUnit.SECONDS);
 
       /* Returning the first update sent to our find card query. */
       GiftCardRecord giftCardRecord = queryResult.updates().blockFirst();
       return ResponseEntity.ok().body(giftCardRecord);
+//    }catch (NotEnoughMoneyException e) {
+      //https://groups.google.com/g/axonframework/c/gBL9_R-Fp20
+//      throw e;
     }
  
   }

@@ -1,44 +1,23 @@
 spring:
   application:
-    name: axon-mongo
-  main: 
+    name: KafkaAxonExample
+  main:
     allow-bean-definition-overriding: true
 
 server:
-  port: 8080
-  
-logging:
-  level:
-    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
-    org.axonframework.extensions.mongo.MongoTemplate: DEBUG
+  port: 8082
 
-# This is a sample properties file to configure the Kafka Extension
 axon:
   kafka:
-#    bootstrap-servers: localhost:9093
-#    client-id: kafka-axon-example-1
-#    default-topic: local.event.1
-#    properties:
-#      security.protocol: PLAINTEXT
-#
-#    publisher:
-#      confirmation-mode: transactional
-#
-#    producer:
-#      transaction-id-prefix: kafka-sample-1
-#      retries: 0
-#      event-processor-mode: subscribing
-#      # For additional unnamed properties, add them to the `properties` map like so
-#      properties:
-#        some-key: [some-value]
-#
-#    fetcher:
-#      poll-timeout: 3000
-#
-    consumer:
-#      enable-auto-commit: true
-#      auto-commit-interval: 3000
+    clientid: kafka-axon-example
+    #defaulttopic: local.event
+    producer:
+      retries: 0
+      bootstrapservers: localhost:9092
       event-processor-mode: tracking
-#      # For additional unnamed properties, add them to the `properties` map like so
-#      properties:
-#        some-key: [some-value]
+    consumer:
+      bootstrapservers: localhost:9092
+      group-id: "local.event.consumer-group"
+      event-processor-mode: tracking
+    properties:
+      security.protocol: PLAINTEXT

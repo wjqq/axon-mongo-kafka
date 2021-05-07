@@ -4,7 +4,9 @@ import com.demo.api.command.CardIncreaseCmd;
 import com.demo.api.command.IssueCmd;
 import com.demo.api.event.CardIncreasedEvt;
 import com.demo.api.event.IssuedEvt;
+import com.demo.domain.exception.NotEnoughMoneyException;
 import lombok.NoArgsConstructor;
+import org.axonframework.commandhandling.CommandExecutionException;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
@@ -35,6 +37,10 @@ class GiftCard {
     @CommandHandler
     public void updateCardIncrease(CardIncreaseCmd cmd) {
         log.info("handling {}", cmd);
+        if(cmd.getAmount()>10) {
+          throw new NotEnoughMoneyException("TOO MUCH");
+        }
+        
         apply(new CardIncreasedEvt(cmd.getId(), cmd.getAmount()));
     }
 
@@ -43,12 +49,12 @@ class GiftCard {
       log.info("applying {}", evt);
           id = evt.getId();
           remainingValue = evt.getAmount();
-      log.info("new remaining value: {}", remainingValue);
+      log.info("new remaining value-IssuedEvt: {}", remainingValue);
     }
     
     @EventSourcingHandler
     void on(CardIncreasedEvt evt) {
       remainingValue = this.remainingValue + evt.getAmount();
-      log.info("new remaining value: {}", remainingValue);
+      log.info("new remaining value-CardIncreasedEvt: {}", remainingValue);
     }
 }

@@ -21,12 +21,18 @@ import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration.class)
 public class AxonMongoDemoApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(AxonMongoDemoApplication.class, args);
     }
+
+    //retry later...
+//    @Autowired
+//    public void configurationEventHandling(EventProcessingConfigurer config) {
+//        config.registerDefaultListenerInvocationErrorHandler(configuration -> PropagatingErrorHandler.instance());
+//    }
 
     /**
      * Axon provides an event store `EmbeddedEventStore`. It delegates actual storage and retrieval of events to an `EventStorageEngine`.
@@ -64,28 +70,28 @@ public class AxonMongoDemoApplication {
         .mongoTemplate(template)
         .serializer(serializer).build();
   }
-
-  /**
-   * Configures a snapshot trigger to create a Snapshot every 5 events.
-   * 5 is an arbitrary number used only for testing purposes just to show how the snapshots are stored on Mongo as well.
-   */
-  @Bean
-  public SnapshotTriggerDefinition giftCardSnapConfig(Configuration configuration) {
-    return new EventCountSnapshotTriggerDefinition(configuration.snapshotter(), 5);
-  }
-
+  
   @Bean
   public MongoTemplate axonMongoTemplate() {
     return DefaultMongoTemplate.builder().mongoDatabase(mongo(), "db-axon0").build();
   }
-
+  
+  @Bean
+  public MongoClient mongo() {
+    return new MongoClient(new ServerAddress("localhost", 27017));
+  }
+  
   @Bean
   public MongoDbFactory mongoDbFactory(MongoClient client) {
     return new SimpleMongoDbFactory(client, "db-axon0");
   }
 
+  /**
+   * The method name "giftCardSnapConfig" is referred in the aggregation class.
+   */
   @Bean
-  public MongoClient mongo() {
-    return new MongoClient(new ServerAddress("localhost", 27017));
+  public SnapshotTriggerDefinition giftCardSnapConfig(Configuration configuration) {
+    return new EventCountSnapshotTriggerDefinition(configuration.snapshotter(), 5);
   }
+  
 }
