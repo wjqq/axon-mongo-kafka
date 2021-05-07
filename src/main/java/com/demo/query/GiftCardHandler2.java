@@ -25,6 +25,6 @@ class GiftCardHandler2 {
 
   @EventHandler
   void on(IssuedEvt event) {
-    System.out.println("Insued in 2. "+ event.getId());
+    System.out.println("Insued in 2. "+ event.getId()+Thread.currentThread().getName());
   }
 }

@@ -36,7 +36,7 @@ class GiftCardHandler {
   @EventHandler
   void on(IssuedEvt event) {
     
-    System.out.println("Insued. "+ event.getId());
+    System.out.println("Insued. "+ event.getId() +">>"+ Thread.currentThread().getName());
 
     /*
      * Update our read model by inserting the new card.

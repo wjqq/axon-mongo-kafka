@@ -16,14 +16,17 @@ import org.axonframework.extensions.kafka.eventhandling.producer.KafkaPublisher;
 import org.axonframework.extensions.kafka.eventhandling.producer.ProducerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 
 /**
  * @author 025937672
  *
  */
 @Configuration
+@AutoConfigureAfter(AxonConfig.class)
 public class KafkaEventPublicationConfiguration {
   
   @Value("${axon.kafka.consumer.bootstrapservers}")
