@@ -79,7 +79,12 @@ src
    App 启动类啦-_-!!
 ```
 
-> 流程
+> 流程, 启动前保证kafka和mongo已经启动
+```
+docker run --network=kafka -d --name=zookeeper -e ZOOKEEPER_CLIENT_PORT=2181 confluentinc/cp-zookeeper:4.1.0
+docker run --net=kafka -d -p 9092:9092 --name=kafka -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092 -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 confluentinc/cp-kafka:4.1.0
+Mongo我是安装到本地的，就不提供docker启动方式了，自己google吧
+```
 1. 創建card
 ```
 POST http://localhost:8082/cards
