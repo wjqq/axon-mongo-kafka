@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
+ * This command is used increase the balance of the specified card
+ * 
  * @author 025937672
  *
  */

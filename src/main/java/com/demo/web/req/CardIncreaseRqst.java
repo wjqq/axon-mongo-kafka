@@ -1,4 +1,4 @@
-package com.demo.api.request;
+package com.demo.web.req;
 
 import java.io.Serializable;
 import lombok.Data;
@@ -8,4 +8,3 @@ public class CardIncreaseRqst implements Serializable {
   private String id;
   private Integer value;
 }
-

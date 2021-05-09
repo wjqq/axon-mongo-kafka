@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.demo;
+package com.demo.config;
 
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
@@ -19,20 +19,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 
 /**
  * @author 025937672
  *
  */
 @Configuration
-@AutoConfigureAfter(AxonConfig.class)
-public class KafkaEventPublicationConfiguration {
+public class PublicationConfiguration {
   
-  @Value("${axon.kafka.consumer.bootstrapservers}")
+  @Value("${axon.kafka.bootstrapservers}")
   String bootstrapservers;
   
-  String topic = "t111111111111111";
+  @Value("${axon.kafka.producer.topic}")
+  String topic;
   
   @Autowired
   public void registerPublisherToEventProcessor(EventProcessingConfigurer eventProcessingConfigurer,
@@ -54,13 +53,14 @@ public class KafkaEventPublicationConfiguration {
   @Bean
   public KafkaPublisher<String, byte[]> kafkaPublisher(
       ProducerFactory<String, byte[]> producerFactory) {
-    return KafkaPublisher.<String, byte[]>builder().topic(topic).producerFactory(producerFactory)
+    return KafkaPublisher.<String, byte[]>builder().topic(topic)
+        .publisherAckTimeout(10000).producerFactory(producerFactory)
         .build();
   }
   
   @Bean
   public ProducerFactory<String, byte[]> producerFactory() {
-    return DefaultProducerFactory.<String, byte[]>builder().closeTimeout(1000, ChronoUnit.MILLIS)
+    return DefaultProducerFactory.<String, byte[]>builder().closeTimeout(10000, ChronoUnit.MILLIS)
         .producerCacheSize(10000)
         .configuration(kafkaConfig())
         .confirmationMode(ConfirmationMode.WAIT_FOR_ACK)

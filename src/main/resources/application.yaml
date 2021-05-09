@@ -1,23 +1,26 @@
+#All the configuration is hard-coded in the JAVA code.
 spring:
   application:
-    name: KafkaAxonExample
+    name: CardDemo
   main:
     allow-bean-definition-overriding: true
+
+axon:
+  kafka:
+    bootstrapservers: 127.0.0.1:9092
+    producer:
+      topic: Topic-1
+    consumer: 
+      topic: Topic-1
+      group-id: Group-1
+  mongo:
+    host: localhost
+    port: 27017
+    databse: db-axon0
 
 server:
   port: 8082
 
-axon:
-  kafka:
-    clientid: kafka-axon-example
-    #defaulttopic: local.event
-    producer:
-      retries: 0
-      bootstrapservers: localhost:9092
-      event-processor-mode: tracking
-    consumer:
-      bootstrapservers: localhost:9092
-      group-id: "local.event.consumer-group"
-      event-processor-mode: tracking
-    properties:
-      security.protocol: PLAINTEXT
+logging:
+  level:
+    ROOT: INFO

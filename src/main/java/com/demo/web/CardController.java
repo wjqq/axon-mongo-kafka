@@ -21,18 +21,12 @@ import com.demo.api.command.CardIncreaseCmd;
 import com.demo.api.command.IssueCmd;
 import com.demo.api.query.FindAllGiftCard;
 import com.demo.api.query.FindGiftCardQry;
-import com.demo.api.request.CardIncreaseRqst;
-import com.demo.api.request.IssueRqst;
-import com.demo.api.response.GiftCardRecord;
-import com.demo.domain.exception.NotEnoughMoneyException;
+import com.demo.web.req.CardIncreaseRqst;
+import com.demo.web.req.IssueRqst;
+import com.demo.web.res.GiftCardRecord;
 
-/**
- * Repository REST Controller for handling 'commands' only
- * <p>
- * Sometimes you may want to write a custom handler for a specific resource. To take advantage of Spring Data REST’s settings, message converters, exception handling, and more, we use the @RepositoryRestController annotation instead of a standard Spring MVC @Controller or @RestController
- */
 @RestController
-public class AxonMongoDemoRestController {
+public class CardController {
 
   @Autowired
   private CommandGateway commandGateway;
@@ -52,11 +46,7 @@ public class AxonMongoDemoRestController {
       /* Returning the first update sent to our find card query. */
       GiftCardRecord giftCardRecord = queryResult.updates().blockFirst();
       return ResponseEntity.ok().body(giftCardRecord);
-//    }catch (NotEnoughMoneyException e) {
-      //https://groups.google.com/g/axonframework/c/gBL9_R-Fp20
-//      throw e;
     }
- 
   }
   
   @PostMapping(value = "/cards", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -88,5 +78,4 @@ public class AxonMongoDemoRestController {
     return queryGateway.query(new FindAllGiftCard(),
         ResponseTypes.multipleInstancesOf(GiftCardRecord.class));
   }
-
 }

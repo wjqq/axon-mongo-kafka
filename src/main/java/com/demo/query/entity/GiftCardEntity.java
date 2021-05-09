@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Document("abc")
+@Document("GiftCard")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

@@ -1,15 +1,20 @@
 /**
  * 
  */
-package com.demo;
+package com.demo.config;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.axonframework.config.EventProcessingConfigurer;
+import org.axonframework.config.Configurer;
+import org.axonframework.eventhandling.TrackingEventProcessorConfiguration;
+import org.axonframework.eventhandling.TrackingToken;
+import org.axonframework.eventhandling.tokenstore.TokenStore;
 import org.axonframework.extensions.kafka.eventhandling.consumer.AsyncFetcher;
 import org.axonframework.extensions.kafka.eventhandling.consumer.ConsumerFactory;
 import org.axonframework.extensions.kafka.eventhandling.consumer.DefaultConsumerFactory;
@@ -23,21 +28,27 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConditionalOnProperty(name = "axon.kafka.consumer.event-processor-mode",
-    havingValue = "TRACKING")
 public class TrackingConfiguration {
   
-  @Value("${axon.kafka.consumer.bootstrapservers}")
+  @Value("${axon.kafka.bootstrapservers}")
   String bootstrapservers;
   @Value("${axon.kafka.consumer.group-id}")
   String groupId;
-  
-  String topic = "t111111111111111";
+  @Value("${axon.kafka.consumer.topic}")
+  String topic;
   
   @Autowired
-  public void configureStreamableKafkaSource(EventProcessingConfigurer configurer,
-      StreamableKafkaMessageSource<String, byte[]> streamableKafkaMessageSource) {
-      configurer.registerTrackingEventProcessor("kafka-group", c->streamableKafkaMessageSource);
+  public void configureProcessor(Configurer configurer,
+      StreamableKafkaMessageSource<String, byte[]> streamableKafkaMessageSource,
+      TokenStore tokenStore) {
+    
+    TrackingToken giftCardHandlerTrackingToken = tokenStore.fetchToken("GiftCardHandler", 0);
+    configurer.eventProcessing().usingSubscribingEventProcessors()
+        .registerTrackingEventProcessor("GiftCardHandler",
+            c->streamableKafkaMessageSource,
+            c -> TrackingEventProcessorConfiguration.forParallelProcessing(1)
+                .andInitialTrackingToken(sms -> giftCardHandlerTrackingToken)
+                .andTokenClaimInterval(10000, TimeUnit.SECONDS));
   }
   
   @Bean
@@ -62,7 +73,7 @@ public class TrackingConfiguration {
     Map<String, Object> config = new HashMap<>();
     config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,bootstrapservers);
     config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
+    config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
     config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     config.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
     System.out.println("bootstrapservers: "+bootstrapservers);

@@ -14,20 +14,20 @@ import com.demo.api.event.CardIncreasedEvt;
 import com.demo.api.event.IssuedEvt;
 import com.demo.api.query.FindAllGiftCard;
 import com.demo.api.query.FindGiftCardQry;
-import com.demo.api.response.GiftCardRecord;
 import com.demo.domain.exception.NotEnoughMoneyException;
 import com.demo.query.entity.GiftCardEntity;
 import com.demo.query.repo.GiftCardRepository;
+import com.demo.web.res.GiftCardRecord;
 
 @Component
 @ProcessingGroup("GiftCardHandler")
-class GiftCardHandler {
+class GiftCardProjector {
 
   private final GiftCardRepository giftCardRepository;
   private final QueryUpdateEmitter queryUpdateEmitter;
 
   @Autowired
-  public GiftCardHandler(GiftCardRepository giftCardRepository,
+  public GiftCardProjector(GiftCardRepository giftCardRepository,
       QueryUpdateEmitter queryUpdateEmitter) {
     this.giftCardRepository = giftCardRepository;
     this.queryUpdateEmitter = queryUpdateEmitter;
@@ -37,7 +37,6 @@ class GiftCardHandler {
   void on(IssuedEvt event) {
     
     System.out.println("Insued. "+ event.getId() +">>"+ Thread.currentThread().getName());
-
     /*
      * Update our read model by inserting the new card.
      */
