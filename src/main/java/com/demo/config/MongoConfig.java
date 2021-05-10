@@ -25,18 +25,6 @@ import com.mongodb.ServerAddress;
  */
 @Configuration
 public class MongoConfig {
-
-  @Bean
-  public EventStorageEngine storageEngine(MongoTemplate template) {
-    return MongoEventStorageEngine.builder().mongoTemplate(template).build();
-  }
-
-  // https://github.com/AxonFramework/extension-mongo/blob/master/mongo-axon-example/src/main/kotlin/org/axonframework/extension/mongo/example/MongoAxonExampleApplication.kt
-  @Bean
-  public TokenStore tokenStore(MongoTemplate template, Serializer serializer) {
-    return MongoTokenStore.builder().mongoTemplate(template).serializer(serializer).build();
-  }
-
   @Bean
   public MongoTemplate axonMongoTemplate() {
     return DefaultMongoTemplate.builder().mongoDatabase(mongo(), "db-axon0").build();
@@ -52,10 +40,4 @@ public class MongoConfig {
     return new SimpleMongoDbFactory(client, "db-axon0");
   }
 
-  //The method name "giftCardSnapConfig" is referred in the aggregation class.
-  @Bean
-  public SnapshotTriggerDefinition giftCardSnapConfig(
-      org.axonframework.config.Configuration configuration) {
-    return new EventCountSnapshotTriggerDefinition(configuration.snapshotter(), 5);
-  }
 }

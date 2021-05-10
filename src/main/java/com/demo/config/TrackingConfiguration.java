@@ -23,11 +23,13 @@ import org.axonframework.extensions.kafka.eventhandling.consumer.streamable.Kafk
 import org.axonframework.extensions.kafka.eventhandling.consumer.streamable.StreamableKafkaMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@AutoConfigureAfter(AxonConfig.class)
 public class TrackingConfiguration {
   
   @Value("${axon.kafka.bootstrapservers}")
@@ -42,13 +44,12 @@ public class TrackingConfiguration {
       StreamableKafkaMessageSource<String, byte[]> streamableKafkaMessageSource,
       TokenStore tokenStore) {
     
-    TrackingToken giftCardHandlerTrackingToken = tokenStore.fetchToken("GiftCardHandler", 0);
     configurer.eventProcessing().usingSubscribingEventProcessors()
         .registerTrackingEventProcessor("GiftCardHandler",
             c->streamableKafkaMessageSource,
             c -> TrackingEventProcessorConfiguration.forParallelProcessing(1)
-                .andInitialTrackingToken(sms -> giftCardHandlerTrackingToken)
-                .andTokenClaimInterval(10000, TimeUnit.SECONDS));
+            //Don't need to intialize the token as Axon should cover it for us..
+                .andTokenClaimInterval(1000, TimeUnit.SECONDS));
   }
   
   @Bean

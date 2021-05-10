@@ -36,7 +36,7 @@ class GiftCardProjector {
   @EventHandler
   void on(IssuedEvt event) {
     
-    System.out.println("Insued. "+ event.getId() +">>"+ Thread.currentThread().getName());
+    System.out.println("Insued Card In Projector. "+ event.getId() +">>"+ Thread.currentThread().getName());
     /*
      * Update our read model by inserting the new card.
      */
@@ -47,8 +47,7 @@ class GiftCardProjector {
     queryUpdateEmitter.emit(FindGiftCardQry.class,
         findGiftCardQry -> Objects.equals(event.getId(), findGiftCardQry.getId()),
         new GiftCardRecord(event.getId(), event.getAmount(), event.getAmount()));
-  
-    System.out.println("Insued Emitter. "+ event.getId());
+    System.out.println("Notified subscription."+ event.getId());
   }
   
   @EventHandler
