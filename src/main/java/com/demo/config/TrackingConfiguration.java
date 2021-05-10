@@ -49,7 +49,7 @@ public class TrackingConfiguration {
             c->streamableKafkaMessageSource,
             c -> TrackingEventProcessorConfiguration.forParallelProcessing(1)
             //Don't need to intialize the token as Axon should cover it for us..
-                .andTokenClaimInterval(1000, TimeUnit.SECONDS));
+                .andTokenClaimInterval(5, TimeUnit.SECONDS));
   }
   
   @Bean

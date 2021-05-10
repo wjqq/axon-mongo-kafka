@@ -61,6 +61,8 @@ public class CardController {
 
       commandGateway.sendAndWait(new IssueCmd(giftCardId, request.getValue()));
 
+      //Long poll
+      
       /* Returning the first update sent to our find card query. */
       GiftCardRecord giftCardRecord = queryResult.updates().blockFirst();
       return ResponseEntity.ok().body(giftCardRecord);
